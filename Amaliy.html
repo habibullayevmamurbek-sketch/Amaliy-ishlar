@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Mening Maxsus Xaritam</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; font-family: sans-serif; }
+        #map { height: 100vh; width: 100%; }
+        .locate-btn {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            z-index: 1000; background: #007bff; color: white; padding: 18px 0;
+            border: none; border-radius: 12px; font-size: 16px; font-weight: bold;
+            width: 85%; cursor: pointer; box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+        .locate-btn:active { transform: translateX(-50%) scale(0.98); background: #0056b3; }
+        .leaflet-touch.leaflet-bar a { width: 44px; height: 44px; line-height: 44px; }
+        @media (min-width: 768px) { .locate-btn { width: 300px; } }
+    </style>
+</head>
+<body>
+
+    <button class="locate-btn" onclick="findMe()">MENING JOYLASHUVIM</button>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        var map = L.map('map', {
+            zoomControl: true, dragging: true, tap: true, touchZoom: true
+        }).setView([41.53, 60.45], 11); // Nuqtalaringiz atrofida boshlang'ich ko'rinish
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        // Yangilangan koordinatalar[cite: 1]
+        var points = [
+            { lat: 41.341001, lng: 60.365775, title: "Fakultet" },
+            { lat: 41.335787, lng: 60.361775, title: "Stadion" },
+            { lat: 41.568567, lng: 60.616003, title: "Mening universitetim" }
+        ];
+
+        points.forEach(function(point) {
+            L.marker([point.lat, point.lng]).addTo(map)
+                .bindPopup("<b>" + point.title + "</b><br>Mobil xarita.", { autoPanPadding: [20, 20] });
+        });
+
+        map.zoomControl.setPosition('topright');
+
+        function findMe() {
+            map.locate({ setView: true, maxZoom: 16, enableHighAccuracy: true });
+        }
+
+        map.on('locationfound', function(e) {
+            var radius = e.accuracy / 2;
+            L.marker(e.latlng).addTo(map).bindPopup("Siz shu yerdasiz").openPopup();
+            L.circle(e.latlng, radius, { color: '#007bff', fillOpacity: 0.2 }).addTo(map);
+        });
+
+        map.on('locationerror', function() {
+            alert("Joylashuvni aniqlash imkonsiz.");
+        });
+    </script>
+</body>
+</html>
